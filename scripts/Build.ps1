@@ -42,9 +42,12 @@ $framework = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319'
 $compiler = Join-Path $framework 'csc.exe'
 if (!(Test-Path $compiler)) { throw '.NET Framework x64 C# compiler is missing.' }
 $stub = Join-Path $PWD 'build/Launcher.exe'
+$sourceFile = (Resolve-Path 'src/Launcher.cs').Path
+$manifestFile = (Resolve-Path 'src/launcher.manifest').Path
+$compressionAssembly = Join-Path $framework 'System.IO.Compression.dll'
 & $compiler /nologo /target:exe /platform:x64 /optimize+ "/out:$stub" `
-    /win32manifest:src/launcher.manifest `
-    "/reference:$framework/System.IO.Compression.dll" src/Launcher.cs
+    "/win32manifest:$manifestFile" `
+    "/reference:$compressionAssembly" $sourceFile
 if ($LASTEXITCODE -ne 0) { throw "C# compilation failed: $LASTEXITCODE" }
 
 # Streaming append avoids embedding a ~1 GB resource in the compiler process.
