@@ -14,6 +14,9 @@ internal static class Launcher
 
     private static int Main(string[] args)
     {
+        // Opt into modern .NET Framework path handling without a sidecar .config file.
+        AppContext.SetSwitch("Switch.System.IO.UseLegacyPathHandling", false);
+        AppContext.SetSwitch("Switch.System.IO.BlockLongPaths", false);
         bool test = args.Length > 0;
         try
         {
