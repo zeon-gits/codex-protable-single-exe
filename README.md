@@ -1,23 +1,22 @@
 # codex-protable-single-exe
 
-将指定的官方 ChatGPT x64 MSIX 封装为实验性单文件启动器。仓库名称按请求保留 `protable` 拼写。
+将指定的官方 ChatGPT x64 MSIX 封装为实验性单文件启动器。
 
 **这是未获官方支持的便携化实验。构建成功只说明封装和解压测试通过，不等于登录、服务、本地执行及所有功能可用。** 不绕过认证、授权、包完整性检查或应用沙箱，不修改官方应用代码。
 
 ## 在 GitHub 上构建
 
-1. 在自己的账号创建公开仓库 `codex-protable-single-exe`，默认分支为 `main`。
-2. 将本工程所有文件（包括 `.github/workflows/build.yml`）提交到仓库根目录。
-3. 首次 push 会自动运行。也可以打开 **Actions → Build experimental portable EXE → Run workflow**。
-4. `expected_sha256` 可留空以下载链接当前版本，也可以填写自己已核验的 64 位 SHA-256，以固定输入包。
-5. 构建成功后，在本次运行的 **Artifacts** 中下载 `ChatGPT-Portable-experimental-x64`。
-6. GitHub artifact 下载结果是 ZIP；解压后只有 `ChatGPT-Portable.exe` 一个文件。另一个 `build-report` artifact 包含来源、版本、哈希、签名验证和测试记录。
+1. Frok 该仓库。
+2. 首次 push 会自动运行。也可以打开 **Actions → Build experimental portable EXE → Run workflow**。
+3. `expected_sha256` 可留空以下载链接当前版本，也可以填写自己已核验的 64 位 SHA-256，以固定输入包。
+4. 构建成功后，在本次运行的 **Artifacts** 中下载 `ChatGPT-Portable-experimental-x64`。
+5. GitHub artifact 下载结果是 ZIP；解压后只有 `ChatGPT-Portable.exe` 一个文件。另一个 `build-report` artifact 包含来源、版本、哈希、签名验证和测试记录。
 
 工作流使用 `windows-2022`、只读仓库权限、`actions/checkout@v4` 和 `actions/upload-artifact@v4`。不需要 PAT、API key 或任何自定义 Secrets；产物保留 14 天。不会发布 Release。Actions 主版本标签会随上游更新；如需严格供应链锁定，可审核后改为完整 commit SHA。
 
 ## 运行方法
 
-将 EXE 放到 U 盘一个简短、可写的路径（例如 `U:\GPT\`），双击启动。第一次会校验并释放应用；控制台显示进度。不要在应用运行时拔掉 U 盘或关闭启动器控制台。
+将 EXE 放到本地一个简短、可写的路径（例如 `D:\GPT\`），双击启动。第一次会校验并释放应用；控制台显示进度。不要在应用运行时拔掉 U 盘或关闭启动器控制台。
 
 程序将创建以下目录：
 
@@ -48,19 +47,6 @@ ChatGPTPortableData/
 8. 上述路径重定向属于实验性尝试。应用可能覆盖参数或继续使用宿主 AppData、注册表、凭据库；本工程不保证完全数据便携或零残留。不会复制当前电脑账号或自动迁移现有安装数据。
 9. 启动器等待主进程退出并保留运行缓存，避免 Electron 辅助进程仍存活时误删文件。独占锁仅覆盖启动器生命周期，不能保证拦截已经独立运行的官方安装版或残留进程。
 10. `scripts/Test-Package.ps1` 校验内嵌包、提取到含空格和中文的目录，对每个应用文件与原始 MSIX 逐一比对 SHA-256，再验证损坏 payload 会被拒绝。CI 不登录、不启动真实应用界面。
-
-## 必须由你验证的事项
-
-- 未安装官方版的干净 Windows 上，以普通用户身份启动。
-- 登录、浏览器回调、对话、文件上传、退出再打开。
-- 改变 U 盘盘符，换电脑后重启；重新登录可能是正常现象。
-- 你需要的本地执行、浏览器连接、文件操作等功能。
-- 配置和缓存实际写入哪里，以及是否产生宿主电脑残留。
-- 应用退出后任务管理器中是否仍有相关进程，确认后再安全弹出 U 盘。
-
-该包包含 LocalSystem 沙箱服务、COM、协议和执行别名等安装集成。本启动器不注册 MSIX、不安装服务、不修改防火墙，也不启用 `--no-sandbox`。因此有关功能可能报错或不可用；不能用“偷偷安装/关闭沙箱”解决后仍称为严格便携版。云端对话仍需要联网。
-
-EXE 外壳未签名，Windows 可能显示未知发布者。请核对 `build-report/SHA256SUMS.txt`，遵循电脑现有安全策略。本工程不会关闭或绕过安全保护。不要将生成的 EXE 再签名而不适配尾部格式：附加签名会移动尾部位置。
 
 ## 本地构建和诊断
 
