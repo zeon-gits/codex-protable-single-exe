@@ -77,7 +77,15 @@ pwsh -File .\scripts\Test-Package.ps1
 
 ## 当前验证状态
 
-本工程已完成静态检查；尚未在 Windows runner 编译执行，尚未验证 GUI 功能。首次 Actions 运行是首次 Windows 构建测试，如果失败，请保留日志继续修正。
+2026-10-19：Windows Server 2022 Actions 构建及封装测试已通过，运行编号 #4，构建提交 `5e925d5cf4d7b6a6a7bf4c15aa7492ff8bb96847`。
+
+- [成功的构建及 artifact 页面](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/39194579849)
+- [单 EXE artifact](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/39194579849/artifacts/12160884871)
+- [构建报告](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/39194579849/artifacts/12161357794)
+
+已通过官方 MSIX 签名验证、C# 编译、内嵌包 SHA-256 检查、含中文和空格目录的完整解压及逐文件比对、损坏包拒绝测试。已修复旧版编译器路径解析及深层资源长路径解压问题；解压使用扩展长度路径，不修改电脑全局设置。artifact 保留至 2026-11-02，过期后可手动重新构建。
+
+**尚未验证应用 GUI、登录和具体功能。** 损坏测试日志中的 `Embedded MSIX checksum mismatch` 是主动修改测试副本后的预期结果，不代表交付 EXE 损坏。
 
 参考：
 - https://learn.microsoft.com/en-us/windows/apps/get-started/intro-pack-dep-proc
