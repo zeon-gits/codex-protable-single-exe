@@ -1,0 +1,53 @@
+name: Build experimental portable EXE
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha256:
+        description: Optional SHA-256 of the official MSIX (blank accepts current download)
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths: ['.github/workflows/build.yml', 'scripts/**', 'src/**']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portable-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download, verify, and build
+        env:
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+        run: ./scripts/Build.ps1 -ExpectedSha256 $env:EXPECTED_SHA256
+      - name: Test payload extraction and corruption rejection
+        run: ./scripts/Test-Package.ps1
+      - name: Upload single EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChatGPT-Portable-experimental-x64
+          path: dist/ChatGPT-Portable.exe
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - name: Upload build report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-report
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14
