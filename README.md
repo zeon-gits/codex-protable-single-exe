@@ -2,7 +2,7 @@
 
 将指定的官方 ChatGPT x64 MSIX 封装为实验性单文件启动器。
 
-**这是未获官方支持的便携化实验。构建成功只说明封装和解压测试通过，不等于登录、服务、本地执行及所有功能可用。** 不绕过认证、授权、包完整性检查或应用沙箱，不修改官方应用代码。
+**这是未获官方支持的便携化实验。构建成功只说明封装和解压测试通过，不等于登录、服务、本地执行及所有功能可用。**
 
 ## 在 GitHub 上构建
 
@@ -71,11 +71,8 @@ pwsh -File .\scripts\Test-Package.ps1
 
 已通过官方 MSIX 签名验证、C# 编译、内嵌包 SHA-256 检查、含中文和空格目录的完整解压及逐文件比对、损坏包拒绝测试。已修复旧版编译器路径解析及深层资源长路径解压问题；解压使用扩展长度路径，不修改电脑全局设置。artifact 保留至 2026-11-02，过期后可手动重新构建。
 
-**尚未验证应用 GUI、登录和具体功能。** 损坏测试日志中的 `Embedded MSIX checksum mismatch` 是主动修改测试副本后的预期结果，不代表交付 EXE 损坏。
-
-参考：
+## 参考
 - https://learn.microsoft.com/en-us/windows/apps/get-started/intro-pack-dep-proc
 - https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/
-- https://github.com/actions/upload-artifact
 
 本仓库仅提供封装源码与流程，不声明拥有或重新授权内嵌的 OpenAI 应用及其第三方组件；原软件适用其自身条款和许可证。
