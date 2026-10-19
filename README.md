@@ -7,7 +7,7 @@
 ## 在 GitHub 上构建
 
 1. Frok 该仓库。
-2. 首次 frok 会自动运行。也可以打开 **Actions → Build experimental portable EXE → Run workflow**。
+2. 新 fork 仓库需在 Actions 页面启用工作流，并打开 **Actions → Build experimental portable EXE → Run workflow**来运行构建工作流
 3. `expected_sha256` 可留空以下载链接当前版本，也可以填写自己已核验的 64 位 SHA-256，以固定输入包。
 4. 构建成功后，在本次运行的 **Artifacts** 中下载 `ChatGPT-Portable-experimental-x64`。
 5. GitHub artifact 下载结果是 ZIP；解压后只有 `ChatGPT-Portable.exe` 一个文件。另一个 `build-report` artifact 包含来源、版本、哈希、签名验证和测试记录。
