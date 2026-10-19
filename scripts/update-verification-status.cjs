@@ -27,8 +27,8 @@ module.exports = async function update({github, context, core}) {
   lines.push('', result === 'success'
     ? '本次已通过封装与解压测试；应用启动、登录、服务及具体功能仍待用户实机验证。'
     : '本次未完成全部构建和封装验证；请查看运行日志。不能据此认定已生成可用 EXE。');
-  lines.push('', '调度：以 2026-10-19 UTC 为锚点，每 72 小时一个构建日期，每日 00:17 UTC（新加坡时间 08:17）检查；GitHub 可能延迟或漏发调度。手动及 fork 事件不受日期门控。');
-  lines.push('', 'fork 事件在被 fork 的原仓库运行。新 fork 仓库需在 Actions 页面启用工作流，并可手动 Run workflow 完成首次构建。仅状态更新任务请求 contents: write；构建任务保持只读权限。');
+  lines.push('', '调度：以 2026-10-19 UTC 为锚点，每 72 小时一个构建日期，每日 00:17 UTC（新加坡时间 08:17）检查；GitHub 可能延迟或漏发调度。手动事件不受日期门控。');
+  lines.push('', '新 fork 仓库需在 Actions 页面启用工作流，并可手动 Run workflow 完成首次构建。仅状态更新任务请求 contents: write；构建任务保持只读权限。');
   const body = lines.join('\n');
   for (let attempt = 0; attempt < 3; attempt++) {
     const {data} = await github.rest.repos.getContent({...repo, path: 'README.md', ref: branch});
