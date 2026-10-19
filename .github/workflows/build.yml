@@ -8,7 +8,6 @@ on:
         required: false
         type: string
   # GitHub sends this event to the repository being forked, not the new fork.
-  fork:
   schedule:
     # Daily gate below selects every third UTC date, including across months.
     # GitHub schedules are best-effort and may be delayed or dropped.
