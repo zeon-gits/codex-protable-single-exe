@@ -7,21 +7,43 @@ on:
         description: Optional SHA-256 of the official MSIX (blank accepts current download)
         required: false
         type: string
-  push:
-    branches: [main]
-    paths: ['.github/workflows/build.yml', 'scripts/**', 'src/**']
+  # GitHub sends this event to the repository being forked, not the new fork.
+  fork:
+  schedule:
+    # Daily gate below selects every third UTC date, including across months.
+    # GitHub schedules are best-effort and may be delayed or dropped.
+    - cron: '17 0 * * *'
 
 permissions:
   contents: read
 
 concurrency:
-  group: portable-build-${{ github.ref }}
+  group: portable-build-${{ github.repository }}
   cancel-in-progress: false
 
 jobs:
+  cadence:
+    runs-on: ubuntu-latest
+    outputs:
+      due: ${{ steps.cadence.outputs.due }}
+    steps:
+      - id: cadence
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const day = Math.floor(Date.now() / 86400000);
+            const anchor = Math.floor(Date.parse('2026-10-19T00:00:00Z') / 86400000);
+            const due = context.eventName !== 'schedule' || (day - anchor) % 3 === 0;
+            core.setOutput('due', String(due));
+            core.info(due ? 'Build due' : 'Daily check only; next 72-hour slot pending');
+
   build:
+    needs: cadence
+    if: needs.cadence.outputs.due == 'true'
     runs-on: windows-2022
     timeout-minutes: 45
+    outputs:
+      steps: ${{ toJSON(steps) }}
     defaults:
       run:
         shell: pwsh
@@ -30,12 +52,15 @@ jobs:
         with:
           persist-credentials: false
       - name: Download, verify, and build
+        id: package
         env:
           EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
         run: ./scripts/Build.ps1 -ExpectedSha256 $env:EXPECTED_SHA256
       - name: Test payload extraction and corruption rejection
+        id: test
         run: ./scripts/Test-Package.ps1
       - name: Upload single EXE
+        id: exe
         uses: actions/upload-artifact@v4
         with:
           name: ChatGPT-Portable-experimental-x64
@@ -44,6 +69,7 @@ jobs:
           compression-level: 0
           retention-days: 14
       - name: Upload build report
+        id: report
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -51,3 +77,25 @@ jobs:
           path: reports/
           if-no-files-found: warn
           retention-days: 14
+
+  verification-status:
+    name: Update README verification status
+    needs: [cadence, build]
+    if: ${{ always() && needs.cadence.outputs.due == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Update only the current verification section
+        uses: actions/github-script@v7
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+          BUILD_STEPS: ${{ needs.build.outputs.steps }}
+        with:
+          script: |
+            const update = require('./scripts/update-verification-status.cjs');
+            await update({github, context, core});
