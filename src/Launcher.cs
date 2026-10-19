@@ -148,6 +148,9 @@ internal static class Launcher
     {
         Directory.CreateDirectory(destination);
         string root = Path.GetFullPath(destination).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        // Extended-length paths work without changing the machine-wide long-path policy.
+        if (!root.StartsWith(@"\\?\", StringComparison.Ordinal))
+            root = root.StartsWith(@"\\", StringComparison.Ordinal) ? @"\\?\UNC\" + root.Substring(2) : @"\\?\" + root;
         foreach (ZipArchiveEntry entry in archive.Entries)
         {
             if (!entry.FullName.StartsWith("app/", StringComparison.Ordinal)) continue;
