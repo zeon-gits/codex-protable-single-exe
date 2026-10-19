@@ -69,7 +69,7 @@ pwsh -File .\scripts\Test-Package.ps1
 - [单 EXE artifact](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/39194579849/artifacts/12160884871)
 - [构建报告](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/39194579849/artifacts/12161357794)
 
-已通过官方 MSIX 签名验证、C# 编译、内嵌包 SHA-256 检查、含中文和空格目录的完整解压及逐文件比对、损坏包拒绝测试。已修复旧版编译器路径解析及深层资源长路径解压问题；解压使用扩展长度路径，不修改电脑全局设置。artifact 保留至 2026-11-02，过期后可手动重新构建。
+已通过官方 MSIX 签名验证、C# 编译、内嵌包 SHA-256 检查、含中文和空格目录的完整解压及逐文件比对、损坏包拒绝测试。已修复旧版编译器路径解析及深层资源长路径解压问题；解压使用扩展长度路径，不修改电脑全局设置。artifact 保留至 2026-11-02
 
 ## 参考
 - https://learn.microsoft.com/en-us/windows/apps/get-started/intro-pack-dep-proc
