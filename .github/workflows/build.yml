@@ -55,7 +55,7 @@ jobs:
         env:
           EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
         run: ./scripts/Build.ps1 -ExpectedSha256 $env:EXPECTED_SHA256
-      - name: Test payload extraction and corruption rejection
+      - name: Test official icon, payload extraction, and corruption rejection
         id: test
         run: ./scripts/Test-Package.ps1
       - name: Upload single EXE

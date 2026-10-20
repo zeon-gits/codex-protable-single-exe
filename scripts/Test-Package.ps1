@@ -2,6 +2,32 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 Set-Location (Split-Path $PSScriptRoot -Parent)
 $exe = Join-Path $PWD 'dist/ChatGPT-Portable.exe'
+# Verify the final EXE's shell icon against the original ICO, not just a build flag.
+Add-Type -AssemblyName System.Drawing
+$actualIcon = [Drawing.Icon]::ExtractAssociatedIcon($exe)
+if (!$actualIcon) { throw 'Final EXE has no readable shell icon.' }
+$expectedIcon = [Drawing.Icon]::new((Join-Path $PWD 'reports/ChatGPT.ico'), $actualIcon.Width, $actualIcon.Height)
+$actualBitmap = $null
+$expectedBitmap = $null
+try {
+    $actualBitmap = $actualIcon.ToBitmap()
+    $expectedBitmap = $expectedIcon.ToBitmap()
+    if ($actualBitmap.Size -ne $expectedBitmap.Size) { throw 'EXE icon dimensions differ from official ICO.' }
+    for ($y = 0; $y -lt $actualBitmap.Height; $y++) {
+        for ($x = 0; $x -lt $actualBitmap.Width; $x++) {
+            if ($actualBitmap.GetPixel($x, $y).ToArgb() -ne $expectedBitmap.GetPixel($x, $y).ToArgb()) {
+                throw "EXE icon differs from official ICO at ($x, $y)."
+            }
+        }
+    }
+    "PASS: final EXE shell icon matches official ICO ($($actualIcon.Width)x$($actualIcon.Height))." |
+        Set-Content reports/icon-test.txt
+} finally {
+    if ($actualBitmap) { $actualBitmap.Dispose() }
+    if ($expectedBitmap) { $expectedBitmap.Dispose() }
+    $actualIcon.Dispose()
+    $expectedIcon.Dispose()
+}
 $root = Join-Path $PWD ('test-output/' + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $root -Force | Out-Null
 $extracted = Join-Path $root 'Unicode 测试 with spaces'

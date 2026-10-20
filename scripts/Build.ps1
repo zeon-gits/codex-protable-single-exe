@@ -36,7 +36,29 @@ try {
     $manifestText | Set-Content reports/AppxManifest.xml -Encoding utf8
     [long]$expanded = ($zip.Entries | Where-Object FullName -Like 'app/*' |
         Measure-Object Length -Sum).Sum
+    # Read the original ICO from the same signature-verified official package.
+    # Do not use tray icons, a third-party download, or a resized PNG substitute.
+    $iconEntryPath = 'app/resources/icon-chatgpt.ico'
+    $iconEntry = $zip.GetEntry($iconEntryPath)
+    if (!$iconEntry) { throw 'Official ChatGPT ICO missing; inspect upstream package layout.' }
+    $iconPath = Join-Path $PWD 'reports/ChatGPT.ico'
+    [IO.Compression.ZipFileExtensions]::ExtractToFile($iconEntry, $iconPath, $true)
 } finally { $zip.Dispose() }
+
+# Validate the ICO directory before handing it to the compiler.
+$iconBytes = [IO.File]::ReadAllBytes($iconPath)
+if ($iconBytes.Length -lt 22 -or [BitConverter]::ToUInt16($iconBytes, 0) -ne 0 -or
+    [BitConverter]::ToUInt16($iconBytes, 2) -ne 1) { throw 'Invalid official ICO header.' }
+$iconCount = [BitConverter]::ToUInt16($iconBytes, 4)
+if (!$iconCount -or $iconBytes.Length -lt (6 + 16 * $iconCount)) { throw 'Invalid ICO directory.' }
+for ($i = 0; $i -lt $iconCount; $i++) {
+    $entryOffset = 6 + 16 * $i
+    [long]$imageLength = [BitConverter]::ToUInt32($iconBytes, $entryOffset + 8)
+    [long]$imageOffset = [BitConverter]::ToUInt32($iconBytes, $entryOffset + 12)
+    if (!$imageLength -or $imageOffset -lt (6 + 16 * $iconCount) -or
+        $imageOffset + $imageLength -gt $iconBytes.Length) { throw 'Invalid ICO image bounds.' }
+}
+$iconHash = (Get-FileHash -LiteralPath $iconPath -Algorithm SHA256).Hash.ToLowerInvariant()
 
 $framework = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319'
 $compiler = Join-Path $framework 'csc.exe'
@@ -46,7 +68,7 @@ $sourceFile = (Resolve-Path 'src/Launcher.cs').Path
 $manifestFile = (Resolve-Path 'src/launcher.manifest').Path
 $compressionAssembly = Join-Path $framework 'System.IO.Compression.dll'
 & $compiler /nologo /target:exe /platform:x64 /optimize+ "/out:$stub" `
-    "/win32manifest:$manifestFile" `
+    "/win32manifest:$manifestFile" "/win32icon:$iconPath" `
     "/reference:$compressionAssembly" $sourceFile
 if ($LASTEXITCODE -ne 0) { throw "C# compilation failed: $LASTEXITCODE" }
 
@@ -80,6 +102,9 @@ $exeHash = (Get-FileHash $output -Algorithm SHA256).Hash.ToLowerInvariant()
     app_expanded_bytes = $expanded
     output_sha256 = $exeHash
     output_bytes = (Get-Item $output).Length
+    icon_source = "$url#app/resources/icon-chatgpt.ico"
+    icon_sha256 = $iconHash
+    icon_image_count = $iconCount
     built_at_utc = [DateTime]::UtcNow.ToString('o')
     commit = $env:GITHUB_SHA
     validation = 'Packaging only; interactive application validation required.'
@@ -90,6 +115,7 @@ if ($env:GITHUB_STEP_SUMMARY) {
 - Package: $($identity.Name) $($identity.Version)
 - MSIX SHA-256: $hash
 - EXE SHA-256: $exeHash
+- Official ICO: $iconEntryPath ($iconCount images), SHA-256: $iconHash
 - Expanded app bytes: $expanded
 - Download the **ChatGPT-Portable-experimental-x64** artifact after tests pass.
 - EXE is an unsigned experimental launcher; Windows services and package registration are not installed.
