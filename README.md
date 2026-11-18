@@ -63,18 +63,18 @@ pwsh -File .\scripts\Test-Package.ps1
 
 ## 当前验证状态
 
-更新时间：2026-11-15T06:27:40.556Z（UTC）。
+更新时间：2026-11-18T07:26:06.950Z（UTC）。
 
-本次 Windows 构建结果：**成功**；运行 #33，第 1 次尝试，触发方式：schedule。
+本次 Windows 构建结果：**成功**；运行 #36，第 1 次尝试，触发方式：schedule。
 
-- [构建日志与 Artifacts](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/43685410348)
-- 构建提交：`eab3448e97a0ab7c117d96951806e7bb1747f292`
+- [构建日志与 Artifacts](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/44258608269)
+- 构建提交：`e7f93bc4e90f8b396e468e820b6ea3d433e6c384`
 - 官方包下载、签名验证与 EXE 编译：成功
 - 内嵌包校验、完整解压逐文件比对与损坏检测：成功
 - EXE artifact 上传：成功
 - 构建报告上传：成功
-- [单 EXE artifact](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/43685410348/artifacts/14149249520)（保留 14 天）
-- [构建报告](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/43685410348/artifacts/14150670316)（保留 14 天）
+- [单 EXE artifact](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/44258608269/artifacts/14407241980)（保留 14 天）
+- [构建报告](https://github.com/zeon-gits/codex-protable-single-exe/actions/runs/44258608269/artifacts/14407810429)（保留 14 天）
 
 本次已通过封装与解压测试；应用启动、登录、服务及具体功能仍待用户实机验证。
 
